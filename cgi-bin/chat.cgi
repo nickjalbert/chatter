@@ -1,5 +1,7 @@
 #!/usr/local/bin/python
 
+#Author: Nick Jalbert (nickjalbert@gmail.com)
+
 import random
 import sys
 import cgi
