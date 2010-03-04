@@ -4,23 +4,30 @@
 
 import random
 import sys
+import os
 import cgi
 import re
 import time
 import pickle
 
-def printDict(dict):
-    print str(dict).replace("'", '"')
 
-def printHTMLHeader():
-    print "Content-type: text/html\n\n"
+def setupEnvironment():
+    if not os.path.exists("chat.log"):
+        pickle.dump([], open("chat.log", "w"))
+    if not os.path.exists("seq.log"):
+        d = {}
+        d["curr"] = 0
+        d["max"] = 25
+        pickle.dump(d, open("seq.log", "w"))
 
-def hooliganShit(chat_log):
-    print 
+def getJSONDict(dict):
+    return str(dict).replace("'", '"')
+
+def getHTMLHeader():
+    return "Content-type: text/html\n\n"
 
 def main():
-    #printDict([{"a":"b", "c":"d"}, {"e":"f", "g":"h"}])
-    #sys.exit()
+    setupEnvironment()
     form = cgi.FieldStorage()
     try:
         name = form["name"].value
@@ -31,20 +38,22 @@ def main():
     except:
         words = ""
     chat_log = pickle.load(open("chat.log", "r"))
+    seq = pickle.load(open("seq.log", "r"))
+
 
     if (words != "" and name != ""):
-        chat_log.append({"name":name, "words":words})
+        seq["curr"] += 1
+        if seq["curr"] == seq["max"]:
+            seq["curr"] = 0
+        d = {"name":name, "words":words, "seq":seq["curr"], "max":seq["max"]}
+        chat_log.append(d)
 
     chat_log = chat_log[-20:]
 
-
     pickle.dump(chat_log, open("chat.log", "w"))
-    printHTMLHeader()
-    printDict(chat_log)
+    pickle.dump(seq, open("seq.log", "w"))
+    print getHTMLHeader()
+    print getJSONDict(chat_log)
 
-
-
-    return
 
 main()
-

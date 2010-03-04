@@ -6,46 +6,68 @@
  *
  */
 
-
 var max_chat_window_size = 10;
-var old_data = {};
+var chat_display = [];
 
-function postChatLine(chat) {
-    var html_chat = "<li>";
-    html_chat = html_chat + chat["name"];
-    html_chat = html_chat + ": ";
-    html_chat = html_chat + chat["words"];
-    html_chat = html_chat + "</li>";
-    $("#chat_lines").append(html_chat);
+function getFormattedString(chat_item) {
+    var chat_string = chat_item.name;
+    chat_string += "(" + chat_item.seq + ")"
+    chat_string += ": ";
+    chat_string += chat_item.words;
+    return chat_string;
 }
 
+function getHTMLFormatString(chat_item) {
+    var html_str = "<li>";
+    html_str += getFormattedString(chat_item);
+    html_str += "</li>"
+    return html_str;
+}
 
-function initializeChatData(data) {
-    var x;
-    $("#chat_lines").hide();
-    for (x in data) {
-        postChatLine(data[x]) 
+function postChatLine(chat_item) {
+    $("#chat_lines").append(getHTMLFormatString(chat_item));
+}
+
+function correctChatDisplaySize() {
+    while (chat_display.length > max_chat_window_size) {
+        chat_display.shift();
     }
-    $("#chat_lines").fadeIn("slow");
+}
+
+function setChatData(data) {
+    if (chat_display.length == 0) {
+        chat_display = data
+        correctChatDisplaySize()
+        return 0;
+    }
+    var last_seq_displayed = chat_display[chat_display.length - 1].seq;
+    chat_display = data;
+    correctChatDisplaySize();
+    var return_idx = 0;
+    while (return_idx < chat_display.length) {
+        if (chat_display[return_idx].seq == last_seq_displayed) {
+            return_idx++;
+            break;
+        }
+        return_idx++;
+    }
+    if (return_idx == chat_display.length) {
+        return_idx = 0;
+    }
+    return return_idx;
+}
+
+function updateChatDisplay(update_idx) {
+    while (update_idx < chat_display.length) {
+        postChatLine(chat_display[update_idx]);
+        update_idx++;
+    }
     reapOldChat();
-    old_data = data;
 }
 
-//assume data.length >= old_data.length
-function getFirstNonMatch(data) {
-    var i = 0;
-    while (i < old_data.length) {
-        if (old_data[i]["name"] != data[i]["name"]) {
-            alert(old_data[i]["name"] + data[i]["name"]);
-            break;
-        }
-        if (old_data[i]["words"] != data[i]["words"]) {
-            alert(old_data[i]["words"] + data[i]["words"]);
-            break;
-        }
-        i++;
-    }
-    return i;
+function updateChatData(data) {
+    var update_idx = setChatData(data);
+    updateChatDisplay(update_idx);
 }
 
 function reapOldChat() {
@@ -59,23 +81,6 @@ function reapOldChat() {
     }
 }
 
-function handleChatData(data) {
-    var chat_size = $("#chat_lines").children().length; 
-    if (data.length >= chat_size) {
-        var idx = getFirstNonMatch(data);
-        alert(idx);
-        while (idx < data.length) {
-            postChatLine(data[idx]);
-            idx++
-        }
-        reapOldChat();
-    } else {
-        initializeChatData(data);
-    }
-    old_data = data;
-}
-
-
 
 function sendChat() {
     var name_txt = $("#name_text").val();
@@ -84,7 +89,7 @@ function sendChat() {
 
     $.getJSON("cgi-bin/chat.cgi", params,
             function(data) {
-            handleChatData(data);
+            updateChatData(data);
             });
 
 }
@@ -92,7 +97,7 @@ function sendChat() {
 function initializeChat() {
     $.getJSON("cgi-bin/chat.cgi", 
             function(data) {
-            initializeChatData(data);
+            updateChatData(data);
             });
 }
 
