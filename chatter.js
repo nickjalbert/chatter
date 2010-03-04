@@ -11,14 +11,13 @@ var chat_display = [];
 
 function getFormattedString(chat_item) {
     var chat_string = chat_item.name;
-    chat_string += "(" + chat_item.seq + ")"
     chat_string += ": ";
     chat_string += chat_item.words;
     return chat_string;
 }
 
 function getHTMLFormatString(chat_item) {
-    var html_str = "<li>";
+    var html_str = "<li style='display:none'>";
     html_str += getFormattedString(chat_item);
     html_str += "</li>"
     return html_str;
@@ -26,6 +25,7 @@ function getHTMLFormatString(chat_item) {
 
 function postChatLine(chat_item) {
     $("#chat_lines").append(getHTMLFormatString(chat_item));
+    $("ul#chat_lines li:last").fadeIn("slow"); 
 }
 
 function correctChatDisplaySize() {
@@ -47,14 +47,11 @@ function setChatData(data) {
     while (return_idx < chat_display.length) {
         if (chat_display[return_idx].seq == last_seq_displayed) {
             return_idx++;
-            break;
+            return return_idx;
         }
         return_idx++;
     }
-    if (return_idx == chat_display.length) {
-        return_idx = 0;
-    }
-    return return_idx;
+    return 0;
 }
 
 function updateChatDisplay(update_idx) {
@@ -72,7 +69,7 @@ function updateChatData(data) {
 
 function reapOldChat() {
     var chat_size = $("#chat_lines").children().length; 
-    if (chat_size > max_chat_window_size) {
+    if (chat_size > chat_display.length) {
         $("ul#chat_lines li:first").fadeOut("slow", 
                 function () {
                 $(this).remove(); 
@@ -81,12 +78,37 @@ function reapOldChat() {
     }
 }
 
+function placeOtterImageRandomly() {
+    var width_buffer = 150;
+    var total_images = 10;
+    
+    var height = $(window).height()
+    var width = $(window).width()
+    var placement_h = Math.floor(Math.random() * height);
+    var placement_w = Math.floor(Math.random() * (width - width_buffer));
+    placement_w += width_buffer;
+    var otter_number = Math.floor(Math.random() * (total_images + 1));
+
+    var img_html = "<img src='img/otter" + otter_number + ".jpg'";
+    img_html += " style='position:absolute;top:" + placement_h;  
+    img_html += "px;left:" + placement_w + "px'/>"
+    $("body").append(img_html);
+    $("img").click(function() {
+        $(this).fadeOut("slow", function() { $(this).remove()});
+    });
+
+
+
+}
+
 
 function sendChat() {
     var name_txt = $("#name_text").val();
     var words_txt = $("#thoughts_text").val();
     var params = {name:name_txt, words:words_txt};
-
+    $("#thoughts_text").val("");
+    placeOtterImageRandomly();
+    
     $.getJSON("cgi-bin/chat.cgi", params,
             function(data) {
             updateChatData(data);
@@ -109,6 +131,14 @@ $(document).ready(function(event) {
             return false;
             }
             });
+
+        $("#reset_link").click(function(event) {
+            event.preventDefault();
+            $.post("cgi-bin/reset.cgi");
+            initializeChat();
+            });
+
         initializeChat();
+        setInterval("initializeChat()", 2000);
         });
 
