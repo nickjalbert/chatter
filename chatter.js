@@ -11,6 +11,7 @@ var chat_display = [];
 
 function getFormattedString(chat_item) {
     var chat_string = chat_item.name;
+    chat_string += " (" + chat_item.time.split(" ")[1] + ")";
     chat_string += ": ";
     chat_string += chat_item.words;
     return chat_string;
@@ -40,12 +41,12 @@ function setChatData(data) {
         correctChatDisplaySize()
         return 0;
     }
-    var last_seq_displayed = chat_display[chat_display.length - 1].seq;
+    var last_seq_displayed = chat_display[chat_display.length - 1].seqnum;
     chat_display = data;
     correctChatDisplaySize();
     var return_idx = 0;
     while (return_idx < chat_display.length) {
-        if (chat_display[return_idx].seq == last_seq_displayed) {
+        if (chat_display[return_idx].seqnum == last_seq_displayed) {
             return_idx++;
             return return_idx;
         }
@@ -97,8 +98,6 @@ function placeOtterImageRandomly() {
         $(this).fadeOut("slow", function() { $(this).remove()});
     });
 
-
-
 }
 
 
@@ -109,15 +108,13 @@ function sendChat() {
     $("#thoughts_text").val("");
     placeOtterImageRandomly();
     
-    $.getJSON("cgi-bin/chat.cgi", params,
-            function(data) {
-            updateChatData(data);
-            });
+    $.post("write.php", params);
+    refreshChat();
 
 }
 
-function initializeChat() {
-    $.getJSON("cgi-bin/chat.cgi", 
+function refreshChat() {
+    $.getJSON("read.php", 
             function(data) {
             updateChatData(data);
             });
@@ -135,10 +132,10 @@ $(document).ready(function(event) {
         $("#reset_link").click(function(event) {
             event.preventDefault();
             $.post("cgi-bin/reset.cgi");
-            initializeChat();
+            refreshChat();
             });
 
-        initializeChat();
-        setInterval("initializeChat()", 2000);
+        refreshChat();
+        setInterval("refreshChat()", 2000);
         });
 

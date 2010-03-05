@@ -1,1 +1,4 @@
 A chat application using jquery and server side python scripting. 
+
+cgi-bin scripts were used for prototyping, are now deprecated 
+due to upgrade to php/DB.
