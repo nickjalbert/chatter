@@ -8,6 +8,7 @@
 
 var max_chat_window_size = 10;
 var chat_display = [];
+var otter_enabled = true;
 
 function getFormattedString(chat_item) {
     var chat_string = chat_item.name;
@@ -92,7 +93,8 @@ function placeOtterImageRandomly() {
 
     var img_html = "<img src='img/otter" + otter_number + ".jpg'";
     img_html += " style='position:absolute;top:" + placement_h;  
-    img_html += "px;left:" + placement_w + "px'/>"
+    img_html += "px;left:" + placement_w + "px' ";
+    img_html += "class='otterpic'/>"
     $("body").append(img_html);
     $("img").click(function() {
         $(this).fadeOut("slow", function() { $(this).remove()});
@@ -106,7 +108,9 @@ function sendChat() {
     var words_txt = $("#thoughts_text").val();
     var params = {name:name_txt, words:words_txt};
     $("#thoughts_text").val("");
-    placeOtterImageRandomly();
+    if (otter_enabled) {
+        placeOtterImageRandomly();
+    }
     
     $.post("write.php", params);
     refreshChat();
@@ -120,19 +124,48 @@ function refreshChat() {
             });
 }
 
+function resetChat(evt) {
+    evt.preventDefault();
+    $.post("reset.php");
+    refreshChat();
+}
+
+function otterToggle(evt) {
+    evt.preventDefault();
+    if (otter_enabled) {
+        $(".otterpic").each(function() {
+            $(this).fadeOut("slow", function () {
+                $(this).remove(); 
+            });
+        });
+        $("#otter_link").text("Turn otters on!");
+        otter_enabled = false;
+    } else {
+        otter_enabled = true;
+        $("#otter_link").text("Turn otters off");
+    }
+    refreshChat();
+}
+
+function chatAction(evt) {
+    if (evt.keyCode == '13') {
+        sendChat();
+        return false;
+    }
+}
+
 
 $(document).ready(function(event) {
         $("#thoughts_text").keydown(function(event) {
-            if (event.keyCode == '13') {
-            sendChat();
-            return false;
-            }
+            chatAction(event);
             });
 
         $("#reset_link").click(function(event) {
-            event.preventDefault();
-            $.post("cgi-bin/reset.cgi");
-            refreshChat();
+            resetChat(event);
+            });
+
+        $("#otter_link").click(function(event) {
+            otterToggle(event);
             });
 
         refreshChat();

@@ -9,7 +9,7 @@
 include 'functions.php';
 
 $conn = connectToDB();
-$result = mysql_query("SELECT * FROM $table_name");
+$result = mysql_query("SELECT * FROM $table_name ORDER BY time");
 $table_array = array();
 $i = 0;
 

@@ -10,10 +10,10 @@ include 'functions.php';
 
 function getLastSeqnum() {
     global $table_name;
-    $last_chat_query = "SELECT MAX(seqnum) AS max_seq FROM $table_name";
+    $last_chat_query = "SELECT seqnum FROM $table_name WHERE time = (SELECT MAX(time) FROM $table_name)";
     $result = mysql_query($last_chat_query);
     $arr = mysql_fetch_array($result);
-    $lastseq = $arr["max_seq"];
+    $lastseq = $arr["seqnum"];
     return $lastseq;
 }
 
@@ -21,10 +21,6 @@ function removeNextSeqNum($next_seqnum) {
     global $table_name;
     $delete_query = "DELETE FROM $table_name WHERE seqnum = $next_seqnum";
     mysql_query($delete_query);
-}
-
-function sanitize($text) {
-    return $text;
 }
 
 $conn = connectToDB();
