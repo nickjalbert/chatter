@@ -3,38 +3,3 @@ A chat application using jquery and server side python scripting.
 cgi-bin scripts were used for prototyping, are now deprecated 
 due to upgrade to php/DB.
 
-DB Schema:
-
--- phpMyAdmin SQL Dump
--- version 3.2.4
--- http://www.phpmyadmin.net
---
--- Host: localhost
--- Generation Time: Mar 05, 2010 at 04:09 AM
--- Server version: 5.1.30
--- PHP Version: 5.2.6
-
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-
---
--- Database: `jalbert_chat`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `chatter`
---
-
-CREATE TABLE IF NOT EXISTS `chatter` (
-  `time` datetime NOT NULL,
-    `seqnum` int(11) NOT NULL,
-      `name` char(42) COLLATE utf8_unicode_ci NOT NULL,
-        `words` text COLLATE utf8_unicode_ci NOT NULL
-        ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
