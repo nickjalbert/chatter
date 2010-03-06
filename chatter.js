@@ -124,14 +124,14 @@ function refreshChat() {
             });
 }
 
-function resetChat(evt) {
-    evt.preventDefault();
+function resetChat(event) {
+    event.preventDefault();
     $.post("reset.php");
     refreshChat();
 }
 
-function otterToggle(evt) {
-    evt.preventDefault();
+function otterToggle(event) {
+    event.preventDefault();
     if (otter_enabled) {
         $(".otterpic").each(function() {
             $(this).fadeOut("slow", function () {
@@ -147,10 +147,10 @@ function otterToggle(evt) {
     refreshChat();
 }
 
-function chatAction(evt) {
-    if (evt.keyCode == '13') {
+function chatAction(event) {
+    if (event.keyCode == '13') {
+        event.preventDefault();
         sendChat();
-        return false;
     }
 }
 
