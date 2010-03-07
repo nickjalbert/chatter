@@ -95,7 +95,7 @@ if ($words == "") {
 }
 
 if ($name == "") {
-    $name = "ScaryGhost";
+    $name = "Scary Ghost";
 }
 $insert_query = getInsertQuery("", $name, $words);
 mysql_query($insert_query);

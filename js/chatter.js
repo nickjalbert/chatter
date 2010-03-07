@@ -9,6 +9,9 @@
 var max_chat_window_size = 10;
 var chat_display = [];
 var otter_enabled = true;
+var chatter_has_focus = false;
+var title_is_blinking = false;
+var title_text = "Otter Chat!"
 
 function getFormattedString(chat_item) {
     var chat_string = chat_item.name;
@@ -19,15 +22,15 @@ function getFormattedString(chat_item) {
 }
 
 function getHTMLFormatString(chat_item) {
-    var html_str = "<li style='display:none'>";
+    var html_str = "<div class='chat_item' style='display:none'>";
     html_str += getFormattedString(chat_item);
-    html_str += "</li>"
+    html_str += "</div>"
     return html_str;
 }
 
 function postChatLine(chat_item) {
-    $("#chat_lines").append(getHTMLFormatString(chat_item));
-    $("ul#chat_lines li:last").fadeIn("slow"); 
+    $("#words").append(getHTMLFormatString(chat_item));
+    $("div#words .chat_item:last").fadeIn("slow"); 
 }
 
 function correctChatDisplaySize() {
@@ -56,10 +59,30 @@ function setChatData(data) {
     return 0;
 }
 
+function safeUnbindBlink(event, blinkInterval) {
+    clearInterval(blinkInterval);
+    $("#otter_title").text(title_text);
+    $("#chatter").unbind(focusin);
+}
+
 function updateChatDisplay(update_idx) {
+    var executedAtleastOnce = false;
+    var nonzeroUpdate = true;
+    if (update_idx == 0) {
+        nonzeroUpdate = false;
+    }
     while (update_idx < chat_display.length) {
         postChatLine(chat_display[update_idx]);
         update_idx++;
+        executedAtleastOnce = true;
+    }
+    if (executedAtleastOnce && nonzeroUpdate && ! title_is_blinking && ! chatter_has_focus) {
+        var blinkInterval = setInterval("titleBlink()", 2000);
+        $("#chatter").focusin(function(event) {
+                clearInterval(blinkInterval);
+                $("#otter_title").text(title_text);
+                $(this).unbind(event);
+        });
     }
     reapOldChat();
 }
@@ -70,9 +93,9 @@ function updateChatData(data) {
 }
 
 function reapOldChat() {
-    var chat_size = $("#chat_lines").children().length; 
+    var chat_size = $("#words").children().length; 
     if (chat_size > chat_display.length) {
-        $("ul#chat_lines li:first").fadeOut("slow", 
+        $("div#words .chat_item:first").fadeOut("slow", 
                 function () {
                 $(this).remove(); 
                 reapOldChat();
@@ -81,14 +104,12 @@ function reapOldChat() {
 }
 
 function placeOtterImageRandomly() {
-    var width_buffer = 150;
     var total_images = 10;
     
     var height = $(window).height()
     var width = $(window).width()
     var placement_h = Math.floor(Math.random() * height);
-    var placement_w = Math.floor(Math.random() * (width - width_buffer));
-    placement_w += width_buffer;
+    var placement_w = Math.floor(Math.random() * width);
     var otter_number = Math.floor(Math.random() * (total_images + 1));
 
     var img_html = "<img src='img/otter" + otter_number + ".jpg'";
@@ -112,13 +133,13 @@ function sendChat() {
         placeOtterImageRandomly();
     }
     
-    $.post("write.php", params);
+    $.post("php/write.php", params);
     refreshChat();
 
 }
 
 function refreshChat() {
-    $.getJSON("read.php", 
+    $.getJSON("php/read.php", 
             function(data) {
             updateChatData(data);
             });
@@ -126,7 +147,7 @@ function refreshChat() {
 
 function resetChat(event) {
     event.preventDefault();
-    $.post("reset.php");
+    $.post("php/reset.php");
     refreshChat();
 }
 
@@ -154,8 +175,46 @@ function chatAction(event) {
     }
 }
 
+function nameTextAction(event) {
+    if (event.keyCode == '13') {
+        event.preventDefault();
+    }
+}
+
+function titleBlink() {
+    if ($("#otter_title").text() == title_text) {
+        $("#otter_title").text("You Have an Otter Message...");
+    } else {
+        $("#otter_title").text(title_text);
+    }
+
+}
+
+
+function focusInChatArea(event) {
+
+}
+
 
 $(document).ready(function(event) {
+        $("#chatter").draggable();
+        $("#chatter").resizable();
+
+        $("#chatter").focusin(function(event) {
+            chatter_has_focus = true;
+        });
+
+        $("#otter_title").text(title_text);
+        
+        $("#chatter").focusout(function(event) {
+            chatter_has_focus = false;
+        });
+
+
+        $("#name_text").keydown(function(event) {
+            nameTextAction(event);
+            });
+
         $("#thoughts_text").keydown(function(event) {
             chatAction(event);
             });
