@@ -1,13 +1,12 @@
 <html>
     <head>
         <title id="otter_title"></title>
+        <link rel="Icon" href="img/otter-icon.ico" />
         <link type="text/css" href="css/ui-lightness/jquery-ui-1.8rc3.custom.css" rel="Stylesheet" />
-        <style>
-        </style>
-
-
         <script type="text/javascript" src="js/jquery-1.4.2.js"></script>
         <script type="text/javascript" src="js/jquery-ui-1.8rc3.custom.min.js"></script>
+        <script type="text/javascript" src="js/jquery.jplayer.js"></script>
+        <script type="text/javascript" src="js/jquery.corners.js"></script>
         <script type="text/javascript" src="js/chatter.js"> </script>
     </head>
     <body>
@@ -20,8 +19,10 @@
                     Word <input type="text" id="thoughts_text"/>
                 </form>
                 <a href="#" id="reset_link">Reset</a><br/>
-                <a href="#" id="otter_link">Turn otters off</a>
+                <a href="#" id="otter_link">Turn otters off</a><br/>
+                <a href="#" id="sound_link">Turn sound off</a>
             </div>
         </div>
+        <div id="jpId"></div>
     </body>
 </html>

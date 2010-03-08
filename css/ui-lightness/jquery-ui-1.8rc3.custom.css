@@ -10,19 +10,27 @@
 ----------------------------------*/
 #chatter{
     width:250px;
-    background-color:#DDDDDD;
+    padding:10px;
+    background-color:#89C0D4;
+    /*
+    background-color:#89C0D4;
     outline-style:solid;
     outline-width:2px;
+    */
 }
 
 #words{
-    padding:8px;
+    padding:10px;
+    background-color:#FFFFFF;
+    /*
     border-bottom-style:solid;
     border-bottom-width:2px;
+    */
 }
 
 #thoughts{
-    padding:8px;
+    padding:10px;
+    background-color:#69B7D4;
 }
 
 .ui-helper-hidden { display: none; }

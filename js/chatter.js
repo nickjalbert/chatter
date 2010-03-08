@@ -11,6 +11,7 @@ var chat_display = [];
 var otter_enabled = true;
 var chatter_has_focus = false;
 var title_is_blinking = false;
+var sound_enabled = true;
 var title_text = "Otter Chat!"
 
 function getFormattedString(chat_item) {
@@ -59,30 +60,38 @@ function setChatData(data) {
     return 0;
 }
 
-function safeUnbindBlink(event, blinkInterval) {
-    clearInterval(blinkInterval);
-    $("#otter_title").text(title_text);
-    $("#chatter").unbind(focusin);
+
+function playMessageSound() {
+    if(! chatter_has_focus && sound_enabled) {
+        $("#jpId").jPlayer( "play");
+    }
 }
 
-function updateChatDisplay(update_idx) {
-    var executedAtleastOnce = false;
-    var nonzeroUpdate = true;
-    if (update_idx == 0) {
-        nonzeroUpdate = false;
-    }
-    while (update_idx < chat_display.length) {
-        postChatLine(chat_display[update_idx]);
-        update_idx++;
-        executedAtleastOnce = true;
-    }
-    if (executedAtleastOnce && nonzeroUpdate && ! title_is_blinking && ! chatter_has_focus) {
+
+function startTitleBlink() {
+    if (! title_is_blinking && ! chatter_has_focus) {
         var blinkInterval = setInterval("titleBlink()", 2000);
         $("#chatter").focusin(function(event) {
                 clearInterval(blinkInterval);
                 $("#otter_title").text(title_text);
                 $(this).unbind(event);
         });
+    }
+}
+
+function updateChatDisplay(update_idx) {
+    var receivedMessage = false;
+
+    if (update_idx != 0 && update_idx < chat_display.length) {
+        receivedMessage = true;
+    }
+    while (update_idx < chat_display.length) {
+        postChatLine(chat_display[update_idx]);
+        update_idx++;
+    }
+    if (receivedMessage) {
+        playMessageSound();
+        startTitleBlink();
     }
     reapOldChat();
 }
@@ -104,7 +113,7 @@ function reapOldChat() {
 }
 
 function placeOtterImageRandomly() {
-    var total_images = 10;
+    var total_images = 23;
     
     var height = $(window).height()
     var width = $(window).width()
@@ -168,6 +177,17 @@ function otterToggle(event) {
     refreshChat();
 }
 
+function soundToggle(event) {
+    event.preventDefault();
+    if (sound_enabled) {
+        $("#sound_link").text("Turn sound on");
+        sound_enabled = false;
+    } else {
+        $("#sound_link").text("Turn sound off");
+        sound_enabled = true;
+    }
+}
+
 function chatAction(event) {
     if (event.keyCode == '13') {
         event.preventDefault();
@@ -191,18 +211,22 @@ function titleBlink() {
 }
 
 
-function focusInChatArea(event) {
-
-}
-
-
 $(document).ready(function(event) {
+        $("#chatter").corners("20px");
+        $("#words").corners("20px top");
+        $("#thoughts").corners("20px bottom");
         $("#chatter").draggable();
         $("#chatter").resizable();
 
         $("#chatter").focusin(function(event) {
             chatter_has_focus = true;
         });
+
+        $("#jpId").jPlayer( {
+            ready: function () {
+                this.element.jPlayer("setFile", "img/otter-sound.mp3");
+            }
+            });
 
         $("#otter_title").text(title_text);
         
@@ -226,6 +250,11 @@ $(document).ready(function(event) {
         $("#otter_link").click(function(event) {
             otterToggle(event);
             });
+
+        $("#sound_link").click(function(event) {
+            soundToggle(event);
+            });
+
 
         refreshChat();
         setInterval("refreshChat()", 2000);
