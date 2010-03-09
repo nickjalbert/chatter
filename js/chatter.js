@@ -102,7 +102,7 @@ function updateChatData(data) {
 }
 
 function reapOldChat() {
-    var chat_size = $("#words").children().length; 
+    var chat_size = $("#words > .chat_item").size()
     if (chat_size > chat_display.length) {
         $("div#words .chat_item:first").fadeOut("slow", 
                 function () {
@@ -210,13 +210,14 @@ function titleBlink() {
 
 }
 
-
 $(document).ready(function(event) {
-        $("#chatter").corners("20px");
-        $("#words").corners("20px top");
-        $("#thoughts").corners("20px bottom");
+        var padding = "10px"
+        $("#chatter").corners(padding);
+        $("#words").corners(padding + " top");
+        $("#thoughts").corners(padding + " bottom");
+
         $("#chatter").draggable();
-        $("#chatter").resizable();
+        //$("#chatter").resizable();
 
         $("#chatter").focusin(function(event) {
             chatter_has_focus = true;
