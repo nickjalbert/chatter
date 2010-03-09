@@ -15,6 +15,9 @@ var sound_enabled = true;
 var title_text = "Otter Chat!"
 
 function getFormattedString(chat_item) {
+    if (chat_item == null){
+        return "&nbsp;";
+    }
     var chat_string = chat_item.name;
     chat_string += " (" + chat_item.time.split(" ")[1] + ")";
     chat_string += ": ";
@@ -29,8 +32,16 @@ function getHTMLFormatString(chat_item) {
     return html_str;
 }
 
+function postEmptyChatDiv() {
+    $("#words").append(getHTMLFormatString(null));
+}
+
+function postInvisibleChatDiv(htmlstr) {
+    $("#words").append(htmlstr);
+}
+
 function postChatLine(chat_item) {
-    $("#words").append(getHTMLFormatString(chat_item));
+    postInvisibleChatDiv(getHTMLFormatString(chat_item));
     $("div#words .chat_item:last").fadeIn("slow"); 
 }
 
@@ -79,6 +90,39 @@ function startTitleBlink() {
     }
 }
 
+function updateChatDisplayPrototype(update_idx) {
+    /* Assumes the invariant that there 
+     * will be max_chat_window_size chat_items
+     */
+    var receivedMessage = false; 
+    var chat_display_offset = max_chat_window_size - chat_display.length
+    var chat_display_idx = 0;
+    $("#words > .chat_item").each(function(index) {
+            if (chat_display_offset > 0) {
+            $(this).fadeOut("slow", function() {
+                $(this).html(getFormattedString(null));
+                $(this).fadeIn("slow");
+                });
+                chat_display_offset--;
+            } else {
+                var current_element = chat_display[chat_display_idx];
+                var current_string = getFormattedString(current_element);
+                if (current_string != $(this).html()) {
+                    receivedMessage = true;
+                } else {
+                    receivedMessage = false;
+                }
+                $(this).html(current_string);
+                chat_display_idx++;
+            }
+        
+            });
+    if (receivedMessage) {
+        playMessageSound();
+        startTitleBlink();
+    }
+}
+
 function updateChatDisplay(update_idx) {
     var receivedMessage = false;
 
@@ -98,7 +142,7 @@ function updateChatDisplay(update_idx) {
 
 function updateChatData(data) {
     var update_idx = setChatData(data);
-    updateChatDisplay(update_idx);
+    updateChatDisplayPrototype(update_idx);
 }
 
 function reapOldChat() {
@@ -156,8 +200,10 @@ function refreshChat() {
 
 function resetChat(event) {
     event.preventDefault();
-    $.post("php/reset.php");
-    refreshChat();
+    $.post("php/reset.php", function() {
+        resetChatArea();
+    });
+    ///refreshChat();
 }
 
 function otterToggle(event) {
@@ -210,8 +256,28 @@ function titleBlink() {
 
 }
 
+function prepareChatArea() {
+    var i = 0;
+    while (i < max_chat_window_size) {
+        postEmptyChatDiv();
+        $("div#words .chat_item:last").fadeIn("slow"); 
+        i++;
+    }
+}
+
+function resetChatArea() {
+    var chat_items = $("#words > .chat_item").each(function() {
+        $(this).fadeOut("slow", function() {
+            $(this).html(getFormattedString(null));
+            $(this).fadeIn("slow");
+        });
+        
+    });
+}
+
 $(document).ready(function(event) {
-        var padding = "10px"
+        prepareChatArea();
+        var padding = "10px";
         $("#chatter").corners(padding);
         $("#words").corners(padding + " top");
         $("#thoughts").corners(padding + " bottom");
