@@ -1,0 +1,8 @@
+<?
+/* Change these to match your local configuration and copy into db_info.php */
+$dbhost = "localhost";
+$dbname = "projects";
+$dbuser = "nick";
+$dbpass = "password";
+?>
+
