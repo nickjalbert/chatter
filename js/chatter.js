@@ -8,11 +8,11 @@
 
 var max_chat_window_size = 10;
 var chat_display = [];
-var otter_enabled = true;
+var otter_enabled = false;
 var chatter_has_focus = false;
 var title_is_blinking = false;
 var sound_enabled = true;
-var title_text = "Otter Chat!"
+var title_text = "Chatter!"
 
 function getFormattedString(chat_item) {
     if (chat_item == null){
